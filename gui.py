@@ -248,4 +248,21 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        # When console=False on Windows, exceptions are invisible.
+        # Write to a crash log so users can report the error.
+        import traceback
+        log_path = Path.home() / "KiroGateway_crash.log"
+        with open(log_path, "w", encoding="utf-8") as f:
+            traceback.print_exc(file=f)
+        # Also try a message box
+        try:
+            import ctypes
+            ctypes.windll.user32.MessageBoxW(
+                0, f"启动失败，错误日志已写入:\n{log_path}\n\n{e}", "Kiro Gateway Error", 0x10
+            )
+        except Exception:
+            pass
+        sys.exit(1)
